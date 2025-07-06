@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
                 for (String shellyIp : ips) {
                     if (shellyIp == null || shellyIp.isEmpty()) continue;
                     try {
-                        URL url = new URL("http://" + shellyIp + "/relay/0?turn=on");
+                        URL url = new URL("http://" + shellyIp + "/color/0?turn=on&red=255&green=0&blue=0");
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                         try {
                             conn.getResponseCode();
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                         // Keep the relay on for 5 seconds before turning it off
                         Thread.sleep(5000);
 
-                        url = new URL("http://" + shellyIp + "/relay/0?turn=off");
+                        url = new URL("http://" + shellyIp + "/color/0?turn=off");
                         conn = (HttpURLConnection) url.openConnection();
                         try {
                             conn.getResponseCode();
