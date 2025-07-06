@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView timerTextView;
     private EditText manualTimeInput;
-    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton;
+    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton, settingsButton;
 
     private Handler handler = new Handler();
     private long startTime = 0L;
@@ -41,13 +41,16 @@ public class MainActivity extends AppCompatActivity {
             timerTextView.setText(String.format("%02d:%02d", mins, secs));
 
             for (int stopTime : stopTimes) {
-                if (totalSecs == stopTime) {
+                if (totalSecs >= stopTime) {
                     pauseTimer();
                     flashRelay();
+                    break;
                 }
             }
 
-            handler.postDelayed(this, 0);
+            if (isRunning) {
+                handler.postDelayed(this, 0);
+            }
         }
     };
 
@@ -63,6 +66,14 @@ public class MainActivity extends AppCompatActivity {
         plusOneButton = findViewById(R.id.plusOneButton);
         plusFiveButton = findViewById(R.id.plusFiveButton);
         manualTimeInput = findViewById(R.id.manualTimeInput);
+        settingsButton = findViewById(R.id.settingsButton);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            }
+        });
 
         startPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,14 +144,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void adjustTime(long adjustment) {
-        long newTime = updatedTime + adjustment;
+        long current = isRunning ? timeSwapBuff + (System.currentTimeMillis() - startTime) : updatedTime;
+        long newTime = current + adjustment;
 
         if (newTime < 0) {
             newTime = 0;
         }
 
         for (int stopTime : stopTimes) {
-            if (updatedTime < stopTime * 1000 && newTime >= stopTime * 1000) {
+            if (current < stopTime * 1000 && newTime >= stopTime * 1000) {
                 newTime = stopTime * 1000;
             }
         }
@@ -150,11 +162,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         updatedTime = newTime;
+        if (isRunning) {
+            timeSwapBuff = updatedTime - (System.currentTimeMillis() - startTime);
+        } else {
+            timeSwapBuff = updatedTime;
+        }
+
         int secs = (int) (updatedTime / 1000);
         int mins = secs / 60;
         secs = secs % 60;
         timerTextView.setText(String.format("%02d:%02d", mins, secs));
-        timeSwapBuff = updatedTime;
     }
 
     private void updateTimeFromInput(String value) {
