@@ -4,19 +4,27 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/ipAddress1EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/device_ip_1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/ipAddress2EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/device_ip_2" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
