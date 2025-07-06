@@ -36,14 +36,20 @@ public class MainActivity extends AppCompatActivity {
 
             timerTextView.setText(String.format("%02d:%02d", mins, secs));
 
+            boolean shouldContinue = true;
+
             for (int stopTime : stopTimes) {
-                if (secs == stopTime) {
+                if ((updatedTime / 1000) == stopTime) {
                     pauseTimer();
                     flashRelay();
+                    shouldContinue = false;
+                    break;
                 }
             }
 
-            handler.postDelayed(this, 0);
+            if (shouldContinue && isRunning) {
+                handler.postDelayed(this, 0);
+            }
         }
     };
 
