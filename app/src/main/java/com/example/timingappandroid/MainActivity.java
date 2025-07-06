@@ -253,7 +253,8 @@ public class MainActivity extends AppCompatActivity {
                             conn.disconnect();
                         }
 
-                        Thread.sleep(1000);
+                        // Keep the relay on for 5 seconds before turning it off
+                        Thread.sleep(5000);
 
                         url = new URL("http://" + shellyIp + "/relay/0?turn=off");
                         conn = (HttpURLConnection) url.openConnection();
