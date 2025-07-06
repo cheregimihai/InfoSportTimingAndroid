@@ -77,6 +77,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:text="@string/settings" />
+        android:text="@string/settings"
+        android:alpha="0"
+        android:background="@android:color/transparent" />
 
 </RelativeLayout>
