@@ -1,6 +1,8 @@
 
 package com.example.timingappandroid;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView timerTextView;
     private EditText manualTimeInput;
     private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton;
+    private Button settingsButton;
 
     private Handler handler = new Handler();
     private long startTime = 0L;
@@ -61,6 +64,14 @@ public class MainActivity extends AppCompatActivity {
         plusOneButton = findViewById(R.id.plusOneButton);
         plusFiveButton = findViewById(R.id.plusFiveButton);
         manualTimeInput = findViewById(R.id.manualTimeInput);
+        settingsButton = findViewById(R.id.settingsButton);
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            }
+        });
 
         startPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -198,21 +209,25 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    // Replace with your Shelly device's IP address
-                    String shellyIp = "192.168.1.200"; 
-                    URL url = new URL("http://" + shellyIp + "/relay/0?turn=on");
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.disconnect();
+                SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+                String ip1 = prefs.getString("shelly_ip_1", "");
+                String ip2 = prefs.getString("shelly_ip_2", "");
+                String[] ips = {ip1, ip2};
+                for (String shellyIp : ips) {
+                    if (shellyIp == null || shellyIp.isEmpty()) continue;
+                    try {
+                        URL url = new URL("http://" + shellyIp + "/relay/0?turn=on");
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.disconnect();
 
-                    Thread.sleep(1000);
+                        Thread.sleep(1000);
 
-                    url = new URL("http://" + shellyIp + "/relay/0?turn=off");
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.disconnect();
-
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
+                        url = new URL("http://" + shellyIp + "/relay/0?turn=off");
+                        conn = (HttpURLConnection) url.openConnection();
+                        conn.disconnect();
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
