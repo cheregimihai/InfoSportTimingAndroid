@@ -7,9 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.EditText;
-import android.text.InputType;
-import android.content.DialogInterface;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -18,7 +15,8 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private TextView timerTextView;
-    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton, setTimeButton;
+    private EditText manualTimeInput;
+    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton;
 
     private Handler handler = new Handler();
     private long startTime = 0L;
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         minusOneButton = findViewById(R.id.minusOneButton);
         plusOneButton = findViewById(R.id.plusOneButton);
         plusFiveButton = findViewById(R.id.plusFiveButton);
-        setTimeButton = findViewById(R.id.setTimeButton);
+        manualTimeInput = findViewById(R.id.manualTimeInput);
 
         startPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,11 +101,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        setTimeButton.setOnClickListener(new View.OnClickListener() {
+        manualTimeInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-                showSetTimeDialog();
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    updateTimeFromInput(manualTimeInput.getText().toString().trim());
+                }
             }
+        });
+
+        manualTimeInput.setOnEditorActionListener((v, actionId, event) -> {
+            updateTimeFromInput(manualTimeInput.getText().toString().trim());
+            return false;
         });
     }
 
@@ -150,36 +155,21 @@ public class MainActivity extends AppCompatActivity {
         timeSwapBuff = updatedTime;
     }
 
-    private void showSetTimeDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Time (sec or MM:SS)");
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setHint("90 or 01:30");
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                long millis = parseTimeInput(input.getText().toString().trim());
-                if (millis >= 0) {
-                    if (millis > 4800000) {
-                        millis = 4800000;
-                    }
-                    updatedTime = millis;
-                    timeSwapBuff = updatedTime;
-                    int secs = (int) (updatedTime / 1000);
-                    int mins = secs / 60;
-                    secs = secs % 60;
-                    timerTextView.setText(String.format("%02d:%02d", mins, secs));
-                }
+    private void updateTimeFromInput(String value) {
+        long millis = parseTimeInput(value);
+        if (millis >= 0) {
+            if (millis > 4800000) {
+                millis = 4800000;
             }
-        });
-
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+            updatedTime = millis;
+            timeSwapBuff = updatedTime;
+            int secs = (int) (updatedTime / 1000);
+            int mins = secs / 60;
+            secs = secs % 60;
+            timerTextView.setText(String.format("%02d:%02d", mins, secs));
+        }
     }
+
 
     private long parseTimeInput(String value) {
         if (value.contains(":")) {
