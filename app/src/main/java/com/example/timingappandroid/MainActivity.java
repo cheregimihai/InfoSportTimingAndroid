@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
                 String ip1 = prefs.getString("shelly_ip_1", "192.168.1.200");
                 String ip2 = prefs.getString("shelly_ip_2", "192.168.1.201");
                 String[] ips = {ip1, ip2};
+                // Trigger all relays on first
                 for (String shellyIp : ips) {
                     if (shellyIp == null || shellyIp.isEmpty()) continue;
                     try {
@@ -267,12 +268,24 @@ public class MainActivity extends AppCompatActivity {
                         } finally {
                             conn.disconnect();
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                        // Keep the relay on for 5 seconds before turning it off
-                        Thread.sleep(5000);
+                // Keep the relays on for 5 seconds before turning them off
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
 
-                        url = new URL("http://" + shellyIp + "/color/0?turn=off");
-                        conn = (HttpURLConnection) url.openConnection();
+                // Now turn all relays off
+                for (String shellyIp : ips) {
+                    if (shellyIp == null || shellyIp.isEmpty()) continue;
+                    try {
+                        URL url = new URL("http://" + shellyIp + "/color/0?turn=off");
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                         conn.setConnectTimeout(1000);
                         conn.setReadTimeout(1000);
                         try {
@@ -282,8 +295,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
                     }
                 }
             }
