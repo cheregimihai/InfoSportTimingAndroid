@@ -23,8 +23,8 @@ public class SettingsActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
 
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
-        ip1EditText.setText(prefs.getString("shelly_ip_1", ""));
-        ip2EditText.setText(prefs.getString("shelly_ip_2", ""));
+        ip1EditText.setText(prefs.getString("shelly_ip_1", "192.168.1.200"));
+        ip2EditText.setText(prefs.getString("shelly_ip_2", "192.168.1.201"));
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
