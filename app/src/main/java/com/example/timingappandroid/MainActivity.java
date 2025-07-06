@@ -6,6 +6,10 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.text.InputType;
+import android.content.DialogInterface;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,7 +18,7 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private TextView timerTextView;
-    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton;
+    private Button startPauseButton, minusFiveButton, minusOneButton, plusOneButton, plusFiveButton, setTimeButton;
 
     private Handler handler = new Handler();
     private long startTime = 0L;
@@ -64,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         minusOneButton = findViewById(R.id.minusOneButton);
         plusOneButton = findViewById(R.id.plusOneButton);
         plusFiveButton = findViewById(R.id.plusFiveButton);
+        setTimeButton = findViewById(R.id.setTimeButton);
 
         startPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,6 +106,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 adjustTime(5000);
+            }
+        });
+
+        setTimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSetTimeDialog();
             }
         });
     }
@@ -142,6 +154,60 @@ public class MainActivity extends AppCompatActivity {
         secs = secs % 60;
         timerTextView.setText(String.format("%02d:%02d", mins, secs));
         timeSwapBuff = updatedTime;
+    }
+
+    private void showSetTimeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Time (sec or MM:SS)");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("90 or 01:30");
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                long millis = parseTimeInput(input.getText().toString().trim());
+                if (millis >= 0) {
+                    if (millis > 4800000) {
+                        millis = 4800000;
+                    }
+                    updatedTime = millis;
+                    timeSwapBuff = updatedTime;
+                    int secs = (int) (updatedTime / 1000);
+                    int mins = secs / 60;
+                    secs = secs % 60;
+                    timerTextView.setText(String.format("%02d:%02d", mins, secs));
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private long parseTimeInput(String value) {
+        if (value.contains(":")) {
+            String[] parts = value.split(":");
+            if (parts.length == 2) {
+                try {
+                    int mins = Integer.parseInt(parts[0]);
+                    int secs = Integer.parseInt(parts[1]);
+                    return (mins * 60L + secs) * 1000L;
+                } catch (NumberFormatException e) {
+                    return -1;
+                }
+            }
+        } else {
+            try {
+                int secs = Integer.parseInt(value);
+                return secs * 1000L;
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
     }
 
     private void flashRelay() {
