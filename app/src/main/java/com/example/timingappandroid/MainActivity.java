@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         manualTimeInput = findViewById(R.id.manualTimeInput);
         settingsButton = findViewById(R.id.settingsButton);
 
-        updateNextStopIndex(updatedTime);
+        restoreState();
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,6 +141,48 @@ public class MainActivity extends AppCompatActivity {
             updateTimeFromInput(manualTimeInput.getText().toString().trim());
             return false;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        restoreState();
+    }
+
+    private void restoreState() {
+        SharedPreferences timerPrefs = getSharedPreferences("timer_state", MODE_PRIVATE);
+        timeSwapBuff = timerPrefs.getLong("timeSwapBuff", 0L);
+        startTime = timerPrefs.getLong("startTime", System.currentTimeMillis());
+        isRunning = timerPrefs.getBoolean("isRunning", false);
+        nextStopIndex = timerPrefs.getInt("nextStopIndex", 0);
+
+        if (isRunning) {
+            updatedTime = timeSwapBuff + (System.currentTimeMillis() - startTime);
+            startPauseButton.setText("Pause");
+            handler.postDelayed(updateTimerThread, 0);
+        } else {
+            updatedTime = timeSwapBuff;
+            handler.removeCallbacks(updateTimerThread);
+            startPauseButton.setText("Start");
+        }
+
+        int secs = (int) (updatedTime / 1000);
+        int mins = secs / 60;
+        secs = secs % 60;
+        timerTextView.setText(String.format("%02d:%02d", mins, secs));
+        updateNextStopIndex(updatedTime);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences timerPrefs = getSharedPreferences("timer_state", MODE_PRIVATE);
+        timerPrefs.edit()
+                .putLong("startTime", startTime)
+                .putLong("timeSwapBuff", timeSwapBuff)
+                .putBoolean("isRunning", isRunning)
+                .putInt("nextStopIndex", nextStopIndex)
+                .apply();
     }
 
     private void startTimer() {
