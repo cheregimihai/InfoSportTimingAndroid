@@ -34,14 +34,14 @@ public class MainActivity extends AppCompatActivity {
             timeInMilliseconds = System.currentTimeMillis() - startTime;
             updatedTime = timeSwapBuff + timeInMilliseconds;
 
-            int secs = (int) (updatedTime / 1000);
-            int mins = secs / 60;
-            secs = secs % 60;
+            int totalSecs = (int) (updatedTime / 1000);
+            int mins = totalSecs / 60;
+            int secs = totalSecs % 60;
 
             timerTextView.setText(String.format("%02d:%02d", mins, secs));
 
             for (int stopTime : stopTimes) {
-                if (secs == stopTime) {
+                if (totalSecs == stopTime) {
                     pauseTimer();
                     flashRelay();
                 }
