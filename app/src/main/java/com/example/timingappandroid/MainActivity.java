@@ -260,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         URL url = new URL("http://" + shellyIp + "/color/0?turn=on&red=255&green=0&blue=0");
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(1000);
+                        conn.setReadTimeout(1000);
                         try {
                             conn.getResponseCode();
                         } finally {
@@ -271,6 +273,8 @@ public class MainActivity extends AppCompatActivity {
 
                         url = new URL("http://" + shellyIp + "/color/0?turn=off");
                         conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(1000);
+                        conn.setReadTimeout(1000);
                         try {
                             conn.getResponseCode();
                         } finally {
