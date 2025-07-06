@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isRunning = false;
 
     private final int[] stopTimes = {1800, 3600, 3900, 4200, 4500, 4800}; // 30:00, 60:00, 65:00, 70:00, 75:00, 80:00 in seconds
+    private int nextStopIndex = 0;
 
     private Runnable updateTimerThread = new Runnable() {
         public void run() {
@@ -40,12 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
             timerTextView.setText(String.format("%02d:%02d", mins, secs));
 
-            for (int stopTime : stopTimes) {
-                if (totalSecs >= stopTime) {
-                    pauseTimer();
-                    flashRelay();
-                    break;
-                }
+            if (nextStopIndex < stopTimes.length && totalSecs >= stopTimes[nextStopIndex]) {
+                pauseTimer();
+                flashRelay();
+                nextStopIndex++;
             }
 
             if (isRunning) {
@@ -67,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         plusFiveButton = findViewById(R.id.plusFiveButton);
         manualTimeInput = findViewById(R.id.manualTimeInput);
         settingsButton = findViewById(R.id.settingsButton);
+
+        updateNextStopIndex(updatedTime);
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
         int mins = secs / 60;
         secs = secs % 60;
         timerTextView.setText(String.format("%02d:%02d", mins, secs));
+
+        updateNextStopIndex(updatedTime);
     }
 
     private void updateTimeFromInput(String value) {
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
             int mins = secs / 60;
             secs = secs % 60;
             timerTextView.setText(String.format("%02d:%02d", mins, secs));
+            updateNextStopIndex(updatedTime);
         }
     }
 
@@ -211,6 +215,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return -1;
+    }
+
+    private void updateNextStopIndex(long currentMillis) {
+        int currentSecs = (int) (currentMillis / 1000);
+        int index = stopTimes.length; // default if past last stop
+        for (int i = 0; i < stopTimes.length; i++) {
+            if (currentSecs < stopTimes[i]) {
+                index = i;
+                break;
+            }
+        }
+        nextStopIndex = index;
     }
 
     private void flashRelay() {
