@@ -52,6 +52,7 @@
 
     <EditText
         android:id="@+id/manualTimeInput"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -63,12 +64,15 @@
 
     <Button
         android:id="@+id/setTimeButton"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/startPauseButton"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:text="Set Time" />
+        android:hint="MM:SS or sec"
+        android:imeOptions="actionDone"
+        android:inputType="text" />
 
     <Button
         android:id="@+id/startPauseButton"
