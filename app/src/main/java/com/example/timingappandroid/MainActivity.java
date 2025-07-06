@@ -30,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
     private final int[] stopTimes = {1800, 3600, 3900, 4200, 4500, 4800}; // 30:00, 60:00, 65:00, 70:00, 75:00, 80:00 in seconds
     private int nextStopIndex = 0;
 
+    private int settingsClickCount = 0;
+    private long lastSettingsClickTime = 0L;
+
     private Runnable updateTimerThread = new Runnable() {
         public void run() {
             timeInMilliseconds = System.currentTimeMillis() - startTime;
@@ -72,7 +75,17 @@ public class MainActivity extends AppCompatActivity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                long now = System.currentTimeMillis();
+                if (now - lastSettingsClickTime < 600) {
+                    settingsClickCount++;
+                } else {
+                    settingsClickCount = 1;
+                }
+                lastSettingsClickTime = now;
+                if (settingsClickCount >= 5) {
+                    settingsClickCount = 0;
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                }
             }
         });
 
@@ -239,8 +252,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
-                String ip1 = prefs.getString("shelly_ip_1", "");
-                String ip2 = prefs.getString("shelly_ip_2", "");
+                String ip1 = prefs.getString("shelly_ip_1", "192.168.1.200");
+                String ip2 = prefs.getString("shelly_ip_2", "192.168.1.201");
                 String[] ips = {ip1, ip2};
                 for (String shellyIp : ips) {
                     if (shellyIp == null || shellyIp.isEmpty()) continue;
