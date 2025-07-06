@@ -27,6 +27,25 @@ public class TimerLogicTest {
             return false;
         }
         int getNextStopIndex() { return nextStopIndex; }
+
+        long adjust(long current, long adjustment) {
+            long newTime = current + adjustment;
+            for (int stopTime : stopTimes) {
+                long boundary = stopTime * 1000L;
+                if (current < boundary && newTime >= boundary) {
+                    newTime = boundary;
+                } else if (current > boundary && newTime <= boundary) {
+                    newTime = boundary;
+                }
+            }
+            if (newTime < 0) {
+                newTime = 0;
+            }
+            if (newTime / 1000 > 4800) {
+                newTime = 4_800_000L;
+            }
+            return newTime;
+        }
     }
 
     @Test
@@ -46,5 +65,20 @@ public class TimerLogicTest {
         assertEquals(1, state.getNextStopIndex());
         assertFalse(state.checkForStop(1_860_000));
         assertTrue(state.checkForStop(3_600_000));
+    }
+
+    @Test
+    public void testAdjustTimeClampsAroundStops() {
+        TimerState state = new TimerState();
+        int[] boundaries = {1800, 3600, 3900, 4200, 4500, 4800};
+        for (int b : boundaries) {
+            long boundaryMillis = b * 1000L;
+            // +1 sec should not pass the boundary
+            assertEquals(boundaryMillis,
+                    state.adjust(boundaryMillis - 1000L, 1000L));
+            // -1 sec should not go below the boundary
+            assertEquals(boundaryMillis,
+                    state.adjust(boundaryMillis + 1000L, -1000L));
+        }
     }
 }

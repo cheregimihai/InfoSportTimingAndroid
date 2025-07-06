@@ -145,17 +145,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void adjustTime(long adjustment) {
-        long current = isRunning ? timeSwapBuff + (System.currentTimeMillis() - startTime) : updatedTime;
+        long current = isRunning ?
+                timeSwapBuff + (System.currentTimeMillis() - startTime)
+                : updatedTime;
         long newTime = current + adjustment;
+
+        for (int stopTime : stopTimes) {
+            long boundary = stopTime * 1000L;
+            if (current < boundary && newTime >= boundary) {
+                newTime = boundary;
+            } else if (current > boundary && newTime <= boundary) {
+                newTime = boundary;
+            }
+        }
 
         if (newTime < 0) {
             newTime = 0;
-        }
-
-        for (int stopTime : stopTimes) {
-            if (current < stopTime * 1000 && newTime >= stopTime * 1000) {
-                newTime = stopTime * 1000;
-            }
         }
 
         if (newTime / 1000 > 4800) { // 80:00
